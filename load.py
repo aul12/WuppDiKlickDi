@@ -4,8 +4,9 @@ import numpy as np
 
 
 class WavDataSet(torch.utils.data.dataset.Dataset):
-    def __init__(self, file_names):
+    def __init__(self, file_names, factor):
         self.fileNames = file_names
+        self.factor = factor
 
     def __len__(self):
         return len(self.fileNames)
@@ -18,7 +19,7 @@ class WavDataSet(torch.utils.data.dataset.Dataset):
 
         if data.shape[1] != 1:
             data = data[:, 0]
-        end = len(data) - (len(data) % 2**4)
+        end = len(data) - (len(data) % self.factor)
         data = data[0:end]
         data_min = np.min(data)
         data_max = np.max(data)
