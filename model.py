@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 
-downsample_factor = 2
+downsample_factor = 4
 
 class Encoder(nn.Module):
     def __init__(self, num_layers):

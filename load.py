@@ -1,11 +1,12 @@
 import torch.utils.data.dataset
 import scipy.io.wavfile
 import numpy as np
+import glob
 
 
 class WavDataSet(torch.utils.data.dataset.Dataset):
-    def __init__(self, file_names, factor):
-        self.fileNames = file_names
+    def __init__(self, path, factor):
+        self.fileNames = list(glob.glob(path+"/*.wav"))
         self.factor = factor
 
     def __len__(self):
@@ -14,11 +15,9 @@ class WavDataSet(torch.utils.data.dataset.Dataset):
     def __getitem__(self, idx):
         rate, data = scipy.io.wavfile.read(self.fileNames[idx])
 
-        if rate != 44100:
-            raise ValueError("Sample rate is not 44100 for file %s" % (self.fileNames[idx]))
+        if rate != 20000:
+            raise ValueError("Sample rate is %d not 44100 for file %s" % (rate, self.fileNames[idx]))
 
-        if data.shape[1] != 1:
-            data = data[:, 0]
         end = len(data) - (len(data) % self.factor)
         data = data[0:end]
         data_min = np.min(data)
