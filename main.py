@@ -6,11 +6,11 @@ import torch.nn.functional as F
 import torch.utils.data.dataloader
 
 epochs = 100000
-batch_size = 1
-depth = 4
+batch_size = 10
+depth = 8
 
 def main():
-    device = torch.device("cuda")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Device type: %s" % device.type)
 
     encoder = model.Encoder(depth)
@@ -18,12 +18,13 @@ def main():
     net = torch.nn.Sequential(encoder, decoder).to(device)
     optimizer = optim.Adadelta(net.parameters(), lr=0.01)
 
-    dataset = load.WavDataSet("data/wav/", model.downsample_factor**depth)
+    dataset = load.WavDataSet("data/wav/", model.downsample_factor**depth, device)
     dataloader = torch.utils.data.dataloader.DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     print("Starting training")
     for e in range(epochs):
         net.train()
+        loss_sum = 0
         for batch_idx, data in enumerate(dataloader):
             data = data.to(device)
             optimizer.zero_grad()
@@ -31,8 +32,10 @@ def main():
             loss = F.mse_loss(output, data)
             loss.backward()
             optimizer.step()
-            print(
-                f'Train Epoch: {e} [{batch_idx * len(data)}/{len(dataloader.dataset)} ({100. * batch_idx / len(dataloader):.0f}%)]\tLoss: {loss.item():.6f}')
+            loss_sum += loss
+        print("Epoch: %d\tLoss: %f" % (e, loss_sum))
+        if e % 50 == 0:
+            torch.save(net.state_dict(), "model_%d.pth" % e)
 
 
 if __name__ == "__main__":
