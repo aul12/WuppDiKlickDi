@@ -6,11 +6,12 @@ import torch.nn.functional as F
 import torch.utils.data.dataloader
 
 epochs = 100000
-batch_size = 10
+batch_size = 4
 depth = 8
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    data_device = torch.device("cpu")
     print("Device type: %s" % device.type)
 
     encoder = model.Encoder(depth)
@@ -18,7 +19,7 @@ def main():
     net = torch.nn.Sequential(encoder, decoder).to(device)
     optimizer = optim.Adadelta(net.parameters(), lr=0.01)
 
-    dataset = load.WavDataSet("data/wav/", model.downsample_factor**depth, device)
+    dataset = load.WavDataSet("data/wav/", model.downsample_factor**depth, data_device)
     dataloader = torch.utils.data.dataloader.DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     print("Starting training")
@@ -35,7 +36,7 @@ def main():
             loss_sum += loss
         print("Epoch: %d\tLoss: %f" % (e, loss_sum))
         if e % 50 == 0:
-            torch.save(net.state_dict(), "model_%d.pth" % e)
+            torch.save(net.state_dict(), "checkpoint/model_%d.pth" % e)
 
 
 if __name__ == "__main__":
