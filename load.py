@@ -26,11 +26,18 @@ class WavDataSet(torch.utils.data.dataset.Dataset):
         data_min = np.min(data)
         data_max = np.max(data)
         data = list(map(lambda x: -x / data_min if x < 0 else x / data_max, data))
-        data = np.expand_dims(data, axis=0)
 
+        noise = np.random.randn(len(data)) * 0.1
+
+        data_noise = data + noise
+
+        data = np.expand_dims(data, axis=0)
         data = torch.Tensor(data).to(self.device)
 
-        return data
+        data_noise = np.expand_dims(data_noise, axis=0)
+        data_noise = torch.Tensor(data).to(self.device)
+
+        return (data_noise, data)
 
     def __len__(self):
         return len(self.fileNames)

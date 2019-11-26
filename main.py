@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import torch.utils.data.dataloader
 
 epochs = 100000
-batch_size = 4
+batch_size = 1
 depth = 8
 
 def main():
@@ -26,10 +26,11 @@ def main():
     for e in range(epochs):
         net.train()
         loss_sum = 0
-        for batch_idx, data in enumerate(dataloader):
+        for batch_idx, (data_noise, data) in enumerate(dataloader):
             data = data.to(device)
+            data_noise = data_noise.to(device)
             optimizer.zero_grad()
-            output = net(data)
+            output = net(data_noise)
             loss = F.mse_loss(output, data)
             loss.backward()
             optimizer.step()

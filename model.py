@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 
-downsample_factor = 2
+downsample_factor = 1
 filter_size = 3
 filter_number = 32
 dilation = 2
